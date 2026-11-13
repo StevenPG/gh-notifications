@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="1024" viewBox="0 0 1024 1024">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#2b3340"/>
+      <stop offset="1" stop-color="#0d1117"/>
+    </linearGradient>
+    <linearGradient id="bell" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#b8c4d6"/>
+    </linearGradient>
+  </defs>
+  <rect x="64" y="64" width="896" height="896" rx="200" fill="url(#bg)"/>
+  <rect x="64" y="64" width="896" height="896" rx="200" fill="none" stroke="#3d4655" stroke-width="6"/>
+  <g transform="translate(0,20)">
+    <path d="M512 210c-26 0-47 21-47 47v14c-107 24-181 118-181 231v94c0 38-17 74-46 98l-18 15c-14 12-5 35 13 35h558c18 0 27-23 13-35l-18-15c-29-24-46-60-46-98v-94c0-113-74-207-181-231v-14c0-26-21-47-47-47z" fill="url(#bell)"/>
+    <path d="M440 770h144c0 40-32 72-72 72s-72-32-72-72z" fill="#b8c4d6"/>
+  </g>
+  <circle cx="722" cy="302" r="118" fill="#3fb950" stroke="#0d1117" stroke-width="28"/>
+  <path d="M668 304l38 38 70-76" fill="none" stroke="#ffffff" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

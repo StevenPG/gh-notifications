@@ -45,5 +45,28 @@ open "\$URL"
 LAUNCH
 
 chmod +x "$APP/Contents/MacOS/launch"
+
+# Build the icon from assets/icon.svg (rsvg-convert if available, else qlmanage)
+build_icon() {
+  local tmp png set
+  tmp="$(mktemp -d)"; png="$tmp/icon.png"; set="$tmp/icon.iconset"
+  if command -v rsvg-convert >/dev/null; then
+    rsvg-convert -w 1024 -h 1024 "$REPO/assets/icon.svg" -o "$png"
+  else
+    qlmanage -t -s 1024 -o "$tmp" "$REPO/assets/icon.svg" >/dev/null 2>&1
+    mv "$tmp/icon.svg.png" "$png"
+  fi
+  mkdir "$set"
+  for s in 16 32 128 256 512; do
+    sips -z $s $s "$png" --out "$set/icon_${s}x${s}.png" >/dev/null
+    sips -z $((s*2)) $((s*2)) "$png" --out "$set/icon_${s}x${s}@2x.png" >/dev/null
+  done
+  mkdir -p "$APP/Contents/Resources"
+  iconutil -c icns "$set" -o "$APP/Contents/Resources/icon.icns"
+  rm -rf "$tmp"
+}
+build_icon && sed -i '' 's#<key>CFBundleExecutable</key>#<key>CFBundleIconFile</key><string>icon</string>\
+  <key>CFBundleExecutable</key>#' "$APP/Contents/Info.plist" || echo "Icon build failed; continuing without an icon"
+touch "$APP"
 echo "Created: $APP"
 echo "Drag it to your Dock. Server log: /tmp/gh-notifications.log"
