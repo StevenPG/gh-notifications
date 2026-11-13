@@ -1,0 +1,14 @@
+{
+  "name": "gh-notifications",
+  "version": "0.1.0",
+  "description": "A small local web app for triaging GitHub notifications with real filters, state icons and a done history.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "MIT",
+  "private": true
+}

@@ -1,0 +1,4 @@
+node_modules/
+done-log.json
+.DS_Store
+*.log
