@@ -43,6 +43,18 @@ PORT=5000 npm start
 The server only listens on `127.0.0.1`. It reuses your `gh` login, so no token
 is stored by this app.
 
+## macOS Dock shortcut
+
+```sh
+./scripts/install-mac-app.sh
+```
+
+This creates `~/Applications/GH Notifications.app`. Drag it to your Dock. Clicking
+it starts the server if it isn't running (using your login shell so `node` and
+`gh` are found) and opens the page in your default browser. The app points at
+this checkout, so re-run the script if you move the repo. The server keeps
+running in the background; its log is `/tmp/gh-notifications.log`.
+
 ## Search qualifiers
 
 | Qualifier | Example | Meaning |
