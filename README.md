@@ -1,59 +1,59 @@
 # gh-notifications
 
-A small local web app for triaging your GitHub notifications. The github.com
-notifications page is limited, so this gives you real filtering, PR and issue
-state icons, bulk "Done" actions and a history of what you cleared.
+[![CI](https://github.com/StevenPG/gh-notifications/actions/workflows/ci.yml/badge.svg)](https://github.com/StevenPG/gh-notifications/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+![Node](https://img.shields.io/badge/node-%3E%3D18-brightgreen)
+![Dependencies](https://img.shields.io/badge/dependencies-0-success)
 
-Zero dependencies: just Node.js and the [GitHub CLI](https://cli.github.com/).
+A fast, local inbox for your GitHub notifications. The notifications page on
+github.com is hard to filter, so this gives you faceted filtering, search
+qualifiers, PR and issue state icons, bulk **Done** actions and a history of
+everything you cleared.
+
+![Screenshot of gh-notifications](docs/screenshot.png)
+
+_Screenshot uses fake demo data (`npm run demo`)._
 
 ## Features
 
-- State icons for pull requests (open, draft, merged, closed), issues (open,
-  closed, not planned), commits, releases, discussions and CI runs
-- Sidebar facets with live counts: type, state, reason, author type (people vs
-  bots), read status, age and repository
-- Search qualifiers (see below), sorting and grouping, saved between visits
-- Hide Dependabot and other bot PRs by default (based on the real PR author)
-- Mark done one at a time, by selection, by group, or "all matching" the
-  current filters, plus a one-click "closed/merged PRs" cleanup
-- Done history tab, stored locally in `done-log.json`
+- **State at a glance:** icons for pull requests (open, draft, merged, closed),
+  issues (open, closed, not planned), releases, discussions and CI runs
+- **Faceted filters with live counts:** type, state, reason, author type
+  (people vs bots), read status, age and repository
+- **Search qualifiers:** `is:pr state:merged repo:api age:<2d -dependabot`
+- **Hide bots by default:** Dependabot and other bots are detected from the real
+  author, not just the title
+- **Bulk triage:** done one at a time, by selection, by group, "all matching"
+  the current filters, or every closed/merged PR in one click
+- **Done history:** a searchable log of what you cleared, grouped by day
+- **Private and local:** binds to `127.0.0.1`, reuses your `gh` login, no
+  accounts, no telemetry, zero dependencies
 
-## Requirements
+## Quick start
 
-- Node.js 18 or newer
-- GitHub CLI, logged in: `gh auth login`
-
-The token needs the `notifications` scope (and `repo` to read private
-repositories). If needed: `gh auth refresh -s notifications`.
-
-## Run
+Requirements: [Node.js](https://nodejs.org/) 18+ and the
+[GitHub CLI](https://cli.github.com/) (`gh auth login`).
 
 ```sh
-git clone <this repo>
+git clone https://github.com/StevenPG/gh-notifications.git
 cd gh-notifications
-npm start        # or: node server.js
+npm start
 ```
 
-Open <http://localhost:4777>. Set `PORT` to use another port:
+Open <http://localhost:4777>.
+
+Try it without a GitHub login or touching real notifications:
 
 ```sh
-PORT=5000 npm start
+npm run demo
 ```
 
-The server only listens on `127.0.0.1`. It reuses your `gh` login, so no token
-is stored by this app.
+Use another port with `PORT=5000 npm start`.
 
-## macOS Dock shortcut
+### Permissions
 
-```sh
-./scripts/install-mac-app.sh
-```
-
-This creates `~/Applications/GH Notifications.app`. Drag it to your Dock. Clicking
-it starts the server if it isn't running (using your login shell so `node` and
-`gh` are found) and opens the page in your default browser. The app points at
-this checkout, so re-run the script if you move the repo. The server keeps
-running in the background; its log is `/tmp/gh-notifications.log`.
+The `gh` token needs the `notifications` scope (plus `repo` to see private
+repositories). If needed: `gh auth refresh -s notifications`.
 
 ## Search qualifiers
 
@@ -69,17 +69,26 @@ running in the background; its log is `/tmp/gh-notifications.log`.
 | `-term` | `-dependabot`, `-repo:docs` | Exclude |
 | `"quoted"` | `"fix login"` | Phrase match |
 
-Press `/` to focus the search box.
+Press `/` to focus the search box. Filters, search, sort and grouping are
+remembered in your browser.
 
-## Notes
+## macOS Dock shortcut
 
-- "Done" removes the notification from your inbox (same as the Done button on
-  GitHub). GitHub has no API to undo it, so history is a record only.
-- Item state and author are fetched per notification and cached in memory, so
-  the first load can take a few seconds.
-- History is kept in `done-log.json` (last 5000 entries, git-ignored).
+```sh
+./scripts/install-mac-app.sh
+```
 
-## API
+Creates `~/Applications/GH Notifications.app` (with an icon). Drag it to your
+Dock. Clicking it starts the server if needed and opens the page. The app points
+at this checkout, so re-run the script if you move the repo. The app is unsigned;
+on first launch right-click it and choose Open.
+
+## How it works
+
+A small Node server shells out to `gh api` for notifications, looks up each
+PR or issue for its state and author (cached in memory), and serves a single
+vanilla JS page. Marking an item done calls
+`DELETE /notifications/threads/:id` and appends it to `done-log.json`.
 
 | Method | Path | Description |
 | --- | --- | --- |
@@ -88,6 +97,18 @@ Press `/` to focus the search box.
 | POST | `/api/read/:id` | Mark read |
 | GET / DELETE | `/api/history` | Read or clear the done log |
 
+## Notes and limitations
+
+- "Done" is permanent: GitHub has no API to undo it, so history is a record only.
+- The first load can take several seconds while states are fetched.
+- `done-log.json` stays on your machine (git-ignored, last 5000 entries).
+- Intended for local use only; do not expose the server to a network.
+
+## Contributing
+
+Issues and PRs are welcome. See [CONTRIBUTING.md](CONTRIBUTING.md) and
+[SECURITY.md](SECURITY.md).
+
 ## License
 
-MIT
+[MIT](LICENSE)

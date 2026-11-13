@@ -4,6 +4,8 @@ const path = require("path");
 const { execFile } = require("child_process");
 
 const PORT = process.env.PORT || 4777;
+const DEMO = process.env.DEMO === "1";
+const demo = DEMO ? require("./demo") : null;
 
 function gh(args) {
   return new Promise((resolve, reject) => {
@@ -81,7 +83,11 @@ function send(res, code, body, type = "application/json") {
 }
 
 const LOG = path.join(__dirname, "done-log.json");
-const readLog = () => { try { return JSON.parse(fs.readFileSync(LOG, "utf8")); } catch { return []; } };
+const readLog = () => {
+  if (DEMO) return demo.history;
+  try { return JSON.parse(fs.readFileSync(LOG, "utf8")); } catch { return []; }
+};
+const writeLog = (log) => { if (!DEMO) fs.writeFileSync(LOG, JSON.stringify(log.slice(-5000))); };
 const readBody = (req) => new Promise((resolve) => {
   let b = "";
   req.on("data", (c) => (b += c));
@@ -91,28 +97,39 @@ const readBody = (req) => new Promise((resolve) => {
 http
   .createServer(async (req, res) => {
     const url = new URL(req.url, "http://localhost");
+    // Guard against DNS rebinding and cross-site requests to the local API
+    const hostOk = /^(localhost|127\.0\.0\.1)(:\d+)?$/.test(req.headers.host || "");
+    const origin = req.headers.origin;
+    const originOk = !origin || /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/.test(origin);
+    if (!hostOk || !originOk) return send(res, 403, { error: "forbidden" });
     try {
       if (req.method === "GET" && url.pathname === "/api/history") {
         return send(res, 200, readLog());
       }
       if (req.method === "DELETE" && url.pathname === "/api/history") {
-        fs.writeFileSync(LOG, "[]");
+        writeLog([]);
+        if (DEMO) demo.history.length = 0;
         return send(res, 200, { ok: true });
       }
       if (req.method === "GET" && url.pathname === "/api/notifications") {
+        if (DEMO) return send(res, 200, demo.list);
         return send(res, 200, await listNotifications(url.searchParams.get("all") === "true"));
       }
       let m;
       if (req.method === "POST" && (m = url.pathname.match(/^\/api\/done\/(\d+)$/))) {
         const meta = await readBody(req);
+        const entry = { ...meta, id: m[1], doneAt: new Date().toISOString() };
+        if (DEMO) {
+          demo.list = demo.list.filter((n) => n.id !== m[1]);
+          demo.history.push(entry);
+          return send(res, 200, { ok: true });
+        }
         await gh(["api", "-X", "DELETE", `notifications/threads/${m[1]}`]);
-        const log = readLog();
-        log.push({ ...meta, id: m[1], doneAt: new Date().toISOString() });
-        fs.writeFileSync(LOG, JSON.stringify(log.slice(-5000)));
+        writeLog([...readLog(), entry]);
         return send(res, 200, { ok: true });
       }
       if (req.method === "POST" && (m = url.pathname.match(/^\/api\/read\/(\d+)$/))) {
-        await gh(["api", "-X", "PATCH", `notifications/threads/${m[1]}`]);
+        if (!DEMO) await gh(["api", "-X", "PATCH", `notifications/threads/${m[1]}`]);
         return send(res, 200, { ok: true });
       }
       if (req.method === "GET" && url.pathname === "/") {
