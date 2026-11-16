@@ -77,7 +77,7 @@ async function listNotifications(all) {
   }));
 }
 
-const REPO_RE = /^[\w.-]+\/[\w.-]+$/;
+const REPO_RE = /^[\w-][\w.-]*\/[\w.-]*[\w-][\w.-]*$/;
 
 // Queued jobs live on workflow runs that are queued or in progress. Scan the
 // most recently pushed repos unless a specific repo is given.
