@@ -382,6 +382,8 @@ function update() {
 }
 
 // ---- data ----
+// fetch() throws a TypeError when the server is unreachable (stopped or restarted)
+const errMsg = (e) => "Error: " + (e instanceof TypeError ? "cannot reach the server. Is it running? (npm start)" : e.message);
 async function load() {
   $("status").textContent = "Loading...";
   try {
@@ -389,7 +391,7 @@ async function load() {
     const data = await r.json();
     if (!r.ok) throw new Error(data.error);
     items = data;
-  } catch (e) { $("status").textContent = "Error: " + e.message; return; }
+  } catch (e) { $("status").textContent = errMsg(e); return; }
   selected = new Set([...selected].filter((id) => items.some((n) => n.id === id)));
   update();
 }
@@ -421,7 +423,7 @@ async function loadJobs() {
       row.append(a, t);
       list.append(row);
     });
-  } catch (e) { $("jobsStatus").textContent = "Error: " + e.message; }
+  } catch (e) { $("jobsStatus").textContent = errMsg(e); }
 }
 $("jobsRefresh").onclick = loadJobs;
 async function done(ids) {

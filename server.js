@@ -176,4 +176,9 @@ http
       send(res, 500, { error: e.message });
     }
   })
+  .on("error", (e) => {
+    if (e.code !== "EADDRINUSE") throw e;
+    console.error(`Port ${PORT} is already in use. Stop the other instance with \`npm run stop\` or use PORT=<port> npm start.`);
+    process.exit(1);
+  })
   .listen(PORT, "127.0.0.1", () => console.log(`http://localhost:${PORT}`));

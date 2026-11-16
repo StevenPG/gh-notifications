@@ -52,6 +52,10 @@ npm run demo
 
 Use another port with `PORT=5000 npm start`.
 
+Stop a running instance with `npm run stop` (honors `PORT`). If `npm start`
+reports that the port is already in use, an older instance is still running;
+stop it first so the browser talks to the current code.
+
 ### Permissions
 
 The `gh` token needs the `notifications` scope (plus `repo` to see private
