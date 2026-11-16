@@ -29,18 +29,19 @@ PLIST
 
 cat > "$APP/Contents/MacOS/launch" <<LAUNCH
 #!/bin/bash
+# Always runs the current checkout: stops any running instance, then does \`npm start\`.
 REPO="$REPO"
 PORT="$PORT"
 URL="http://localhost:\$PORT"
 
-if ! curl -s -o /dev/null "\$URL/"; then
-  # A login+interactive shell picks up node (fnm/nvm/brew) and gh from your normal PATH.
-  cd "\$REPO" && PORT="\$PORT" nohup /bin/zsh -lic 'exec node server.js' >/tmp/gh-notifications.log 2>&1 &
-  for _ in \$(seq 1 40); do
-    curl -s -o /dev/null "\$URL/" && break
-    sleep 0.25
-  done
-fi
+cd "\$REPO" || exit 1
+# A login+interactive shell picks up node/npm (fnm/nvm/brew) and gh from your normal PATH.
+PORT="\$PORT" /bin/zsh -lic './scripts/stop.sh' >/tmp/gh-notifications.log 2>&1
+PORT="\$PORT" nohup /bin/zsh -lic 'exec npm start' >>/tmp/gh-notifications.log 2>&1 &
+for _ in \$(seq 1 40); do
+  curl -s -o /dev/null "\$URL/" && break
+  sleep 0.25
+done
 open "\$URL"
 LAUNCH
 
