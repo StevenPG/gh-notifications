@@ -25,6 +25,8 @@ _Screenshot uses fake demo data (`npm run demo`)._
   author, not just the title
 - **Bulk triage:** done one at a time, by selection, by group, "all matching"
   the current filters, or every closed/merged PR in one click
+- **Queued jobs:** a tab listing queued GitHub Actions jobs across your recently
+  pushed repositories
 - **Done history:** a searchable log of what you cleared, grouped by day
 - **Private and local:** binds to `127.0.0.1`, reuses your `gh` login, no
   accounts, no telemetry, zero dependencies
@@ -96,6 +98,7 @@ vanilla JS page. Marking an item done calls
 | POST | `/api/done/:id` | Mark done (body: item metadata for history) |
 | POST | `/api/read/:id` | Mark read |
 | GET / DELETE | `/api/history` | Read or clear the done log |
+| GET | `/api/queued-jobs?repo=owner/name` | Queued Actions jobs (`repo` optional; default scans your 30 most recently pushed repos) |
 
 ## Notes and limitations
 

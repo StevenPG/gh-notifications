@@ -44,3 +44,10 @@ test("marking done moves an item into history", async () => {
   assert.ok(!list.some((n) => n.id === first.id));
   assert.ok(hist.some((h) => h.id === first.id));
 });
+
+test("lists queued jobs", async () => {
+  const jobs = await (await fetch(base + "/api/queued-jobs")).json();
+  assert.ok(jobs.length > 0 && jobs[0].repo && jobs[0].name);
+  const bad = await fetch(base + "/api/queued-jobs?repo=../x");
+  assert.equal(bad.status, 400);
+});

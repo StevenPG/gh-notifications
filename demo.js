@@ -45,4 +45,12 @@ const history = [
   url: `https://github.com/${repo}/pull/${100 + i}`, updated: ago(h + 1), doneAt: ago(h),
 }));
 
-module.exports = { list, history };
+const queuedJobs = [
+  ["acme/api", "CI", "test (node 20)", 1],
+  ["acme/api", "CI", "test (node 22)", 1],
+  ["acme/web-app", "Deploy", "build", 0.2],
+].map(([repo, workflow, name, h], i) => ({
+  id: String(7000 + i), repo, workflow, name, branch: "main", createdAt: ago(h), url: `https://github.com/${repo}/actions`,
+}));
+
+module.exports = { list, history, queuedJobs };
