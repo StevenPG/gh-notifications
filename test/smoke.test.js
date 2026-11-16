@@ -44,3 +44,11 @@ test("marking done moves an item into history", async () => {
   assert.ok(!list.some((n) => n.id === first.id));
   assert.ok(hist.some((h) => h.id === first.id));
 });
+
+test("serves static assets with correct types", async () => {
+  const js = await fetch(base + "/js/main.js");
+  assert.equal(js.status, 200);
+  assert.match(js.headers.get("content-type"), /javascript/);
+  assert.equal((await fetch(base + "/css/styles.css")).status, 200);
+  assert.equal((await fetch(base + "/..%2fserver.js")).status, 404);
+});
