@@ -87,7 +87,10 @@ remembered in your browser.
 Creates `~/Applications/GH Notifications.app` (with an icon). Drag it to your
 Dock. Clicking it stops any running instance on the port (via `scripts/stop.sh`),
 runs `npm start` from this checkout so you always get the current code, and
-opens the page. Output goes to `/tmp/gh-notifications.log`. The app points
+opens the page. The server runs as a per-user launchd job
+(`local.gh-notifications.server.<port>`), detached from the app, so the app exits
+right away instead of bouncing in the Dock. `npm run stop` removes the job.
+Output goes to `/tmp/gh-notifications.log`. The app points
 at this checkout, so re-run the script if you move the repo. The app is unsigned;
 on first launch right-click it and choose Open.
 
