@@ -45,6 +45,14 @@ test("marking done moves an item into history", async () => {
   assert.ok(hist.some((h) => h.id === first.id));
 });
 
+test("serves static assets with correct types", async () => {
+  const js = await fetch(base + "/js/main.js");
+  assert.equal(js.status, 200);
+  assert.match(js.headers.get("content-type"), /javascript/);
+  assert.equal((await fetch(base + "/css/styles.css")).status, 200);
+  assert.equal((await fetch(base + "/..%2fserver.js")).status, 404);
+});
+
 test("lists queued jobs", async () => {
   const jobs = await (await fetch(base + "/api/queued-jobs")).json();
   assert.ok(jobs.length > 0 && jobs[0].repo && jobs[0].name);
