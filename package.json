@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "demo": "DEMO=1 node server.js",
+    "stop": "./scripts/stop.sh",
     "test": "node --test test/*.test.js"
   },
   "engines": {

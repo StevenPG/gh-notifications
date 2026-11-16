@@ -22,25 +22,30 @@ cat > "$APP/Contents/Info.plist" <<PLIST
   <key>CFBundleExecutable</key><string>launch</string>
   <key>CFBundlePackageType</key><string>APPL</string>
   <key>CFBundleVersion</key><string>1</string>
-  <key>LSUIElement</key><false/>
+  <key>LSUIElement</key><true/>
 </dict>
 </plist>
 PLIST
 
 cat > "$APP/Contents/MacOS/launch" <<LAUNCH
 #!/bin/bash
+# Always runs the current checkout: stops any running instance, then does \`npm start\`.
+# The server runs as a per-user launchd job so it is fully detached from this app;
+# otherwise macOS keeps the Dock icon bouncing while the server process lives.
 REPO="$REPO"
 PORT="$PORT"
 URL="http://localhost:\$PORT"
+LOG=/tmp/gh-notifications.log
 
-if ! curl -s -o /dev/null "\$URL/"; then
-  # A login+interactive shell picks up node (fnm/nvm/brew) and gh from your normal PATH.
-  cd "\$REPO" && PORT="\$PORT" nohup /bin/zsh -lic 'exec node server.js' >/tmp/gh-notifications.log 2>&1 &
-  for _ in \$(seq 1 40); do
-    curl -s -o /dev/null "\$URL/" && break
-    sleep 0.25
-  done
-fi
+cd "\$REPO" || exit 1
+PORT="\$PORT" ./scripts/stop.sh >"\$LOG" 2>&1
+# A login+interactive shell picks up node/npm (fnm/nvm/brew) and gh from your normal PATH.
+launchctl submit -l "local.gh-notifications.server.\$PORT" -o "\$LOG" -e "\$LOG" -- \\
+  /bin/zsh -lic "cd '\$REPO' && PORT=\$PORT exec npm start"
+for _ in \$(seq 1 40); do
+  curl -s -o /dev/null "\$URL/" && break
+  sleep 0.25
+done
 open "\$URL"
 LAUNCH
 
